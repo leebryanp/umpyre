@@ -19,16 +19,16 @@ setup(
     author_email='dustin.stansburay@gmail.com.com',
     keywords='baseball,sabermetrics,python',
 
-    install_requires=['pandas',
+    install_requires=['numpy>=1.6.1',
+                      'scipy>=0.9'
                       'pandas',
                       'scikit-learn',
                       'ipython',
                       'MySQL-python',
-                      # 'statsmodels',
-                      # 'matplotlib',
+                      'statsmodels',
                       'beautifulsoup4',
                       'dateutils',
                       'seaborn',
-                      'progressbar'
-                      ],
+                      'progressbar',
+                      'lxml'],
 )
