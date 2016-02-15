@@ -5,6 +5,9 @@ import numpy as np
 
 
 def is_numeric(x):
+
+	if x == '':
+		return True  # cast empty values as this as a nan
 	
 	if isinstance(x, int) or isinstance(x, float):
 		return True
@@ -16,6 +19,9 @@ def is_numeric(x):
 			return False
 	
 def as_numeric(x):
+
+	if x == '':
+		return np.NaN 
 	try:
 		return int(x)
 	except:
@@ -28,6 +34,8 @@ def to_numeric(x):
 		else:
 			return x
 	else:
+		if isinstance(x, str):
+			x.replace('\n','').replace('\t','')
 		return x
 
 def format_values(x):
@@ -142,15 +150,31 @@ class BaseballReferenceScraper(object):
 		# get tables
 		tables = self.parse_tables_from_url(url)
 		# compile dataset {key, DataFrame} pairs
+
 		data = {}
-		for table in tables:
+		for idx, table in enumerate(tables):
+
+			# key collision, so don't overwrite	data
+			# include info about position on page for 
+			# back-reference
 			table_id = table['id']
+			if table_id in data:
+				table_id += ' (table %d)' % (idx+1)
 			
+			# skip unspecified tables
 			if table_ids is not None and table_id not in table_ids:  # skip non-requested tables
 				continue
-			
+
 			columns = parse_columns(table)
 			rows = self.parse_rows(table)
+			
+			# detect if there's a hierarchical organization,
+			# use last column names for data column headers
+			num_xtra_columns = len(columns) - len(rows[0])
+			if num_xtra_columns > 0:
+				print 'WARNING: extra columns for table `%s`:' % table_id
+				print ','.join(columns[:num_xtra_columns])
+				columns = columns[num_xtra_columns:]
 			
 			# create pandas dataframe from data
 			df = pd.DataFrame(rows, columns=columns)
@@ -160,5 +184,5 @@ class BaseballReferenceScraper(object):
 			
 			# make columns useable and store in dataset
 			data[table_id] = format_columns(df)
-			
+
 		return data
